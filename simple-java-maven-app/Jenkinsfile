@@ -33,5 +33,6 @@ pipeline {
 		steps {
 			echo 'Running static code analysis...'
 		}
+		}
     }
 }
