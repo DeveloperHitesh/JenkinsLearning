@@ -29,5 +29,9 @@ pipeline {
                 archiveArtifacts artifacts: '**/target/*.jar', fingerprint: true
             }
         }
+		stage('Code Quality') {
+		steps {
+			echo 'Running static code analysis...'
+		}
     }
 }
