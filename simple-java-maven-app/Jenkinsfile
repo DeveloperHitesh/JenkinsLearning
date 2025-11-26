@@ -43,5 +43,10 @@ pipeline {
 			echo 'Running static code analysis...'
 		}
 		}
+		stage('Show App Name') {
+			steps {
+				echo "Application Name is: ${APP_NAME}"
+			}
+		}
     }
 }
