@@ -4,7 +4,16 @@ pipeline {
     tools {
         maven 'maven'
     }
+	
+	environment {
+    APP_NAME = "Simple Java CI/CD"
+	}
 
+	post {
+    always {
+        echo 'Pipeline Completed'
+    }
+	}
     stages {
         stage('Checkout') {
             steps {
