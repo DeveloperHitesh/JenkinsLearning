@@ -29,7 +29,7 @@ pipeline {
             credentialType: 'com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials')
 
         // 8️⃣ RUN PARAMETER (Pick another pipeline build)
-        run(name: 'BASE_BUILD', job: 'java-fast-pipeline', description: 'Select base build to use')
+        run(name: 'BASE_BUILD', job: 'java-fast-build', description: 'Select base build to use')
     }
 
     stages {
