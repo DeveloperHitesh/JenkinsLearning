@@ -41,7 +41,7 @@ pipeline {
                 echo "Run Tests              : ${RUN_TESTS}"
                 echo "Deployment Credential  : ${DEPLOY_CRED}"
                 echo "Secret Token (Masked)  : ${SECRET_TOKEN}"
-                echo "Selected Base Build    : ${BASE_BUILD}"
+                //echo "Selected Base Build    : ${BASE_BUILD}"
 
                 echo """
 ================ RELEASE NOTES ================
