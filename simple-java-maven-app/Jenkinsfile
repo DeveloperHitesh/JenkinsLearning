@@ -7,7 +7,7 @@ pipeline {
 	
 	parameters {
 		string(name:'APP_VERSION',defaultValue:'1.0.0',description:'Application Version')
-		choice(name:'ENV',choices:['dev,'qa','prod'],description:'Deployment environment')
+		choice(name:'ENV',choices:['dev','qa','prod'],description:'Deployment environment')
 		booleanParam(name:'RUN_TESTS',defaultValue:true,description:'Run Test Cases?')
 	}
 	
