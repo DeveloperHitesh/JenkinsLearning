@@ -4,37 +4,82 @@ pipeline {
     tools {
         maven 'maven'
     }
-	
-	parameters {
-		string(name:'APP_VERSION',defaultValue:'1.0.0',description:'Application Version')
-		choice(name:'ENV',choices:['dev','qa','prod'],description:'Deployment environment')
-		booleanParam(name:'RUN_TESTS',defaultValue:true,description:'Run Test Cases?')
-	}
-	
-	environment {
-    APP_NAME = "Simple Java CI/CD"
-	}
 
-	
+    parameters {
+        // 1️⃣ STRING
+        string(name: 'APP_VERSION', defaultValue: '1.0.0', description: 'Application Version')
+
+        // 2️⃣ CHOICE (Dropdown)
+        choice(name: 'ENV', choices: ['dev', 'qa', 'prod'], description: 'Deployment Environment')
+
+        // 3️⃣ BOOLEAN (Checkbox)
+        booleanParam(name: 'RUN_TESTS', defaultValue: true, description: 'Run Test Cases?')
+
+        // 4️⃣ PASSWORD (Hidden text)
+        password(name: 'SECRET_TOKEN', defaultValue: '', description: 'API/ACCESS Token')
+
+        // 5️⃣ TEXT (Multiline)
+        text(name: 'RELEASE_NOTES', defaultValue: 'Enter release notes here...', description: 'Release description')
+
+        // 6️⃣ FILE (Upload file)
+        file(name: 'CONFIG_FILE', description: 'Upload config file (JSON/YAML)')
+
+        // 7️⃣ CREDENTIALS (Pick from Jenkins Credentials)
+        credentials(name: 'DEPLOY_CRED', description: 'Select deployment credentials', 
+            credentialType: 'com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials')
+
+        // 8️⃣ RUN PARAMETER (Pick another pipeline build)
+        run(name: 'BASE_BUILD', job: 'java-fast-pipeline', description: 'Select base build to use')
+    }
+
     stages {
-	
-		
-        stage('Checkout') {
+
+        stage('Show Parameter Values') {
+            steps {
+                echo "Selected App Version   : ${APP_VERSION}"
+                echo "Environment            : ${ENV}"
+                echo "Run Tests              : ${RUN_TESTS}"
+                echo "Deployment Credential  : ${DEPLOY_CRED}"
+                echo "Secret Token (Masked)  : ${SECRET_TOKEN}"
+                echo "Selected Base Build    : ${BASE_BUILD}"
+
+                echo """
+================ RELEASE NOTES ================
+${RELEASE_NOTES}
+==============================================
+                """
+            }
+        }
+
+        stage('Checkout Code') {
             steps {
                 git branch: 'master', url: 'https://github.com/jenkins-docs/simple-java-maven-app.git'
             }
         }
-		
-        stage('Build') {
+
+        stage('Build App') {
             steps {
-                sh 'mvn clean install'
+                sh 'mvn clean install -DskipTests'
             }
         }
 
-        stage('Test') {
-			when { expression {RUN_TESTS == true}}
+        stage('Run Tests') {
+            when {
+                expression { RUN_TESTS == true }
+            }
             steps {
+                echo "Running tests..."
                 sh 'mvn test'
+            }
+        }
+
+        stage('Upload Config File') {
+            when {
+                expression { fileExists(CONFIG_FILE) }
+            }
+            steps {
+                echo "Uploaded file stored at: ${CONFIG_FILE}"
+                sh "cp '${CONFIG_FILE}' ."
             }
         }
 
@@ -43,28 +88,30 @@ pipeline {
                 archiveArtifacts artifacts: '**/target/*.jar', fingerprint: true
             }
         }
-		stage('Code Quality') {
-		steps {
-			echo 'Running static code analysis...'
-		}
-		}
-		stage('Show App Name') {
-			steps {
-				echo "Application Name is: ${APP_NAME}"
-			}
-		}
-		stage('Show Inputs') {
+
+        stage('Deploy') {
+            when {
+                expression { ENV == 'prod' }
+            }
             steps {
-                echo "Version: ${APP_VERSION}"
-                echo "Environment: ${ENV}"
-                echo "Run Tests: ${RUN_TESTS}"
+                echo "Deploying version ${APP_VERSION} to ${ENV}"
+                echo "Using credentials: ${DEPLOY_CRED}"
+                sh 'echo "Simulating deployment..."'
             }
         }
+
     }
-	
-	post {
-    always {
-        echo 'Pipeline Completed'
+
+    post {
+        success {
+            echo "🎉 Pipeline completed successfully!"
+        }
+        failure {
+            echo "❌ Pipeline failed!"
+        }
+        always {
+            echo "Cleaning workspace..."
+            cleanWs()
+        }
     }
-	}
 }
