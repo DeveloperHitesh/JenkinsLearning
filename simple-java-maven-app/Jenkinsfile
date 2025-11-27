@@ -5,6 +5,12 @@ pipeline {
         maven 'maven'
     }
 	
+	parameters {
+		string(name:'APP_VERSION',defaultValue:'1.0.0',description:'Application Version')
+		choice(name:'ENV',choices:['dev,'qa','prod'],description:'Deployment environment')
+		booleanParam(name:'RUN_TESTS',defaultValue:true,description:'Run Test Cases?')
+	}
+	
 	environment {
     APP_NAME = "Simple Java CI/CD"
 	}
@@ -15,12 +21,14 @@ pipeline {
     }
 	}
     stages {
+	
+		
         stage('Checkout') {
             steps {
                 git branch: 'master', url: 'https://github.com/jenkins-docs/simple-java-maven-app.git'
             }
         }
-
+		
         stage('Build') {
             steps {
                 sh 'mvn clean install'
@@ -48,5 +56,12 @@ pipeline {
 				echo "Application Name is: ${APP_NAME}"
 			}
 		}
+		stage('Show Inputs') {
+            steps {
+                echo "Version: ${APP_VERSION}"
+                echo "Environment: ${ENV}"
+                echo "Run Tests: ${RUN_TESTS}"
+            }
+        }
     }
 }
