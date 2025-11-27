@@ -30,6 +30,7 @@ pipeline {
 
         // 8️⃣ RUN PARAMETER (Pick another pipeline build)
         //run(name: 'BASE_BUILD', job: 'java-fast-build')
+		
     }
 
     stages {
@@ -75,13 +76,20 @@ ${RELEASE_NOTES}
         }
 
         stage('Upload Config File') {
-            when {
-                expression { fileExists(CONFIG_FILE) }
-            }
             steps {
-                echo "Uploaded file stored at: ${CONFIG_FILE}"
-                sh "cp '${CONFIG_FILE}' ."
-            }
+				script {
+					if (params.CONFIG_FILE?.trim()) {
+						if (fileExists(params.CONFIG_FILE)) {
+							echo "Uploading file: ${params.CONFIG_FILE}"
+							sh "cp ${params.CONFIG_FILE} ."
+						} else {
+							echo "⚠ File not found: ${params.CONFIG_FILE}"
+						}
+					} else {
+						echo "⚠ CONFIG_FILE is empty, skipping upload"
+					}
+				}
+			}
         }
 
         stage('Archive Artifact') {
