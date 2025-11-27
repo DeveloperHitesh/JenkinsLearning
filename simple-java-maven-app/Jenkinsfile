@@ -59,18 +59,19 @@ ${RELEASE_NOTES}
 
         stage('Build App') {
             steps {
-                sh 'mvn clean install -DskipTests'
-            }
+				withMaven(maven: 'maven') {
+					sh 'mvn clean install -DskipTests'
+				}
+			}
         }
 
         stage('Run Tests') {
             when {
-                expression { RUN_TESTS == true }
-            }
-            steps {
-                echo "Running tests..."
-                sh 'mvn test'
-            }
+				expression { return params.RUN_TESTS == true }
+			}
+			steps {
+				sh "${tool 'maven'}/bin/mvn test"
+			}
         }
 
         stage('Upload Config File') {
